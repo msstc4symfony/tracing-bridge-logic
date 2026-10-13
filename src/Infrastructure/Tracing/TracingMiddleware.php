@@ -11,7 +11,6 @@ use Msstc4Symfony\LogicBundle\Application\Pipeline\ActionContext;
 use Msstc4Symfony\LogicBundle\Application\Pipeline\ActionMiddlewareInterface;
 use Msstc4Symfony\LogicBundle\Application\Pipeline\Attribute\AsActionMiddleware;
 use Msstc4Symfony\TracingBundle\Storage\RequestIdServiceInterface;
-use Msstc4Symfony\TracingBundle\Storage\TraceContext;
 use Override;
 
 /**
@@ -36,21 +35,13 @@ final readonly class TracingMiddleware implements ActionMiddlewareInterface
     #[Override]
     public function handle(InputInterface $input, ActionContext $context, Closure $next): OutputInterface
     {
-        // Both are created on first access; created inside the Action, restore() would drop them.
-        $unitSpan = $this->trace->getTraceParent();
+        // Both are created on first access; created inside the Action, restore() would drop them. withChildSpan() also needs the trace.
+        $this->trace->getTraceParent();
         $this->trace->getRequestId();
+
         $outer = $this->trace->snapshot();
 
-        // Copies every TraceContext field: a field added to it later must be copied here too.
-        $this->trace->restore(new TraceContext(
-            runtimeId: $outer->runtimeId,
-            requestId: $outer->requestId,
-            requestFrom: $outer->requestFrom,
-            traceParent: $unitSpan->child(),
-            remoteTraceParent: $outer->remoteTraceParent,
-            traceState: $outer->traceState,
-            parentSpanId: $unitSpan->parentId,
-        ));
+        $this->trace->restore($outer->withChildSpan());
 
         try {
             return $next($input);

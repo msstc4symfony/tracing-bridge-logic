@@ -11,7 +11,8 @@ run share a `span_id`, and its `parent_span_id` points at the request, command, 
 
 | Bundle | PHP  | Symfony  | logic-bundle | tracing-bundle |
 |--------|------|----------|--------------|----------------|
-| 1.x    | 8.4+ | 7.4, 8.x | ^1.1         | ^1.1           |
+| 1.1    | 8.4+ | 7.4, 8.x | ^1.1         | ^1.2           |
+| 1.0    | 8.4+ | 7.4, 8.x | ^1.1         | ^1.1           |
 
 ## Installation
 

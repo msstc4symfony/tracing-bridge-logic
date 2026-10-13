@@ -41,7 +41,7 @@
     "php": ">=8.4",
     "composer-runtime-api": ">=2.2",
     "msstc4symfony/logic-bundle": "^1.1",
-    "msstc4symfony/tracing-bundle": "^1.1",
+    "msstc4symfony/tracing-bundle": "^1.2",
     "symfony/config": "^7.4|^8.0",
     "symfony/dependency-injection": "^7.4|^8.0",
     "symfony/http-kernel": "^7.4|^8.0"
