@@ -1,5 +1,28 @@
 # Известные ловушки
 
+## Бридж
+
+- **Ленивые id tracing-bundle.** `getTraceParent()`/`getRequestId()` создают значения при первом обращении. Если
+  первое обращение случится внутри Action, `restore($outer)` их отбросит, и код после Action получит другой
+  trace id и request id. Поэтому middleware трогает оба до `snapshot()`; тест
+  `testIdsNotCreatedYetAreSharedByTheActionAndTheUnit`.
+- **`continueTrace()` не подходит** для span Action: он переписывает `remoteTraceParent` и `traceState`.
+- **`KernelBridgeTest::testTheMiddlewareRunsOutsideLogging` читает приватное `ActionPipeline::$middlewares`**
+  через reflection — публичного API порядка у logic-bundle нет.
+- **`new TraceContext(...)` в middleware копирует все поля поштучно** (именованные аргументы): новое необязательное
+  поле `TraceContext` в tracing-bundle 1.x молча станет default внутри Action — его нужно добавить сюда. Лучше
+  было бы `TraceContext::with…()` в tracing-bundle; пока его нет.
+- **Необработанное исключение Action попадает в Sentry со span единицы работы**: обработчик ядра/консоли видит его
+  после `restore()` в `finally`. Связь с Action — лог «Fail application action» (он пишется внутри span).
+- **Изменения trace внутри Action отбрасываются** при выходе (`setRequestId`, `continueTrace`, reset) — так задумано.
+  Стек snapshot/restore на общем `RequestIdService` не годится для Fiber/async, как и сам tracing-bundle.
+- **Span Action нигде не экспортируется**: tracing-bundle только кладёт id в логи, Sentry и исходящие заголовки.
+  Дерево восстанавливается по `span_id`/`parent_span_id` в логах.
+
+## Семейство (Symfony, CI)
+
+- **`bin/init` шаблона даёт namespace с суффиксом `Bundle`** и имя пакета `…-bundle` (историческое: при создании
+  репозитория); у бриджей семейства без суффикса — поправлено вручную (composer, deptrac, README, SECURITY, CI slug).
 - **`kernel.build_dir` в тестовом контейнере.** `PhpFileLoader` Symfony 7.4 читает этот параметр,
   8.x — нет; без него интеграционные тесты падают только в ячейке 7.4.
 - **Теги для своих интерфейсов** регистрировать в `loadExtension()` через

@@ -1,5 +1,5 @@
 {
-  "name": "msstc4symfony/skeleton-bundle",
+  "name": "msstc4symfony/tracing-bridge-logic",
   "license": "MIT",
   "authors": [
     {
@@ -8,26 +8,40 @@
     }
   ],
   "type": "symfony-bundle",
-  "description": "Starter template for msstc4symfony Symfony bundles",
+  "description": "Gives every msstc4symfony/logic-bundle Action its own msstc4symfony/tracing-bundle span id",
   "minimum-stability": "stable",
   "keywords": [
     "php",
-    "symfony"
+    "symfony",
+    "tracing",
+    "logic"
   ],
   "prefer-stable": true,
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/msstc4symfony/logic-bundle"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/msstc4symfony/tracing-bundle"
+    }
+  ],
   "autoload": {
     "psr-4": {
-      "Msstc4Symfony\\SkeletonBundle\\": "src/"
+      "Msstc4Symfony\\TracingBridgeLogic\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Msstc4Symfony\\SkeletonBundle\\Test\\": "tests/"
+      "Msstc4Symfony\\TracingBridgeLogic\\Test\\": "tests/"
     }
   },
   "require": {
     "php": ">=8.4",
     "composer-runtime-api": ">=2.2",
+    "msstc4symfony/logic-bundle": "^1.1",
+    "msstc4symfony/tracing-bundle": "^1.1",
     "symfony/config": "^7.4|^8.0",
     "symfony/dependency-injection": "^7.4|^8.0",
     "symfony/http-kernel": "^7.4|^8.0"
@@ -39,8 +53,13 @@
     "phpstan/phpstan-strict-rules": "^2.0",
     "phpstan/phpstan-symfony": "^2.0",
     "phpunit/phpunit": ">=11.0",
+    "psr/log": "^3.0",
     "rector/rector": "^2.1",
-    "roave/security-advisories": "dev-latest"
+    "roave/security-advisories": "dev-latest",
+    "symfony/filesystem": "^7.4|^8.0",
+    "symfony/framework-bundle": "^7.4|^8.0",
+    "symfony/monolog-bundle": "^3.11|^4.0",
+    "symfony/validator": "^7.4|^8.0"
   },
   "config": {
     "allow-plugins": {

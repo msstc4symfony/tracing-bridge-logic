@@ -1,73 +1,66 @@
-# msstc4symfony/skeleton-bundle
+# msstc4symfony/tracing-bridge-logic
 
-![Build Status](https://github.com/msstc4symfony/skeleton-bundle/actions/workflows/checks.yml/badge.svg?branch=main)
+![Build Status](https://github.com/msstc4symfony/tracing-bridge-logic/actions/workflows/checks.yml/badge.svg?branch=main)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Starter template for msstc4symfony Symfony bundles
-
-<!-- init:start -->
-## Using this template
-
-This block, `bin/init` and its test disappear when the template is initialised.
-
-1. On GitHub: **Use this template → Create a new repository** named `msstc4symfony/<name>-bundle`, then clone it.
-2. `php bin/init OutboxInbox "Transactional outbox and inbox for Messenger"` — PascalCase name without
-   the `Bundle` suffix. It renames the namespace, package, config alias and description, resets the
-   changelog, refreshes `composer-ci.lock` and fails if anything named after the template is left.
-3. The Infection thresholds in `checks.yml` are the template's: re-measure them (`make infection`) for the new bundle.
-   A `vendor/` installed before `bin/init` has the old namespace: rerun `COMPOSER=composer-ci.json composer install`.
-   Then replace the `Greet` example with real code, review `git diff`, then `git add -A && git commit -m "init commit"`.
-4. Green CI, then release `v1.0.0` as usual.
-<!-- init:end -->
+Runs every [logic-bundle](https://github.com/msstc4symfony/logic-bundle) Action in its own
+[tracing-bundle](https://github.com/msstc4symfony/tracing-bundle) span, so the logs and outgoing calls of one Action
+run share a `span_id`, and its `parent_span_id` points at the request, command, message or Action that called it.
 
 ## Compatibility
 
-| Bundle | PHP  | Symfony  |
-|--------|------|----------|
-| 1.x    | 8.4+ | 7.4, 8.x |
+| Bundle | PHP  | Symfony  | logic-bundle | tracing-bundle |
+|--------|------|----------|--------------|----------------|
+| 1.x    | 8.4+ | 7.4, 8.x | ^1.1         | ^1.1           |
 
 ## Installation
 
-The package is not on Packagist yet, so register its GitHub repository first:
+The packages are not on Packagist yet, so register their GitHub repositories first:
 
 ```sh
-composer config repositories.msstc4symfony-skeleton-bundle vcs https://github.com/msstc4symfony/skeleton-bundle
-composer require msstc4symfony/skeleton-bundle
+composer config repositories.msstc4symfony-logic vcs https://github.com/msstc4symfony/logic-bundle
+composer config repositories.msstc4symfony-tracing vcs https://github.com/msstc4symfony/tracing-bundle
+composer config repositories.msstc4symfony-tracing-bridge-logic vcs https://github.com/msstc4symfony/tracing-bridge-logic
+composer require msstc4symfony/tracing-bridge-logic
 ```
 
-Symfony Flex registers the bundle automatically; without Flex add it to `config/bundles.php`:
+Register the bridge in `config/bundles.php` alongside the two bundles it connects (order does not matter):
 
 ```php
-Msstc4Symfony\SkeletonBundle\SkeletonBundle::class => ['all' => true],
+Msstc4Symfony\TracingBundle\TracingBundle::class => ['all' => true],
+Msstc4Symfony\LogicBundle\LogicBundle::class => ['all' => true],
+Msstc4Symfony\TracingBridgeLogic\TracingBridgeLogicBundle::class => ['all' => true],
 ```
 
-## Configuration
+Nothing to configure. Without TracingBundle the container fails to compile: `TracingMiddleware` cannot be
+autowired, as no `RequestIdServiceInterface` service exists.
 
-```yaml
-msstc4symfony_skeleton:
-    greeting: Hello   # non-empty string
-```
+## The span
 
-## Usage
+While an Action runs:
 
-```php
-use Msstc4Symfony\SkeletonBundle\Application\Greeting\Greet\Action;
-use Msstc4Symfony\SkeletonBundle\Application\Greeting\Greet\Input;
+- `span_id` is new, `parent_span_id` is the span id of the unit of work (or Action) that called it;
+- trace id, request id, `request from`, the received `traceparent` and `tracestate` stay those of the unit;
+- HTTP requests and messages sent by the Action carry its span as their parent;
+- an Action called from another Action gets a child of the caller's span.
 
-final readonly class Welcome
-{
-    public function __construct(private Action $greet)
-    {
-    }
+Afterwards the unit's trace is restored exactly, also when the Action throws; the exception is rethrown unchanged.
+Sentry events captured while the Action runs are tagged with its span; an exception that escapes the Action reaches
+Sentry after the restore, so it carries the unit's span — the "Fail application action" log links it to the Action.
+Changes an Action makes to the trace itself (request id, `continueTrace()`, reset) end with it.
+logic-bundle's "Start / Finish / Fail application action" logs are written inside the span, so they link a `span_id`
+to the Action's name.
 
-    public function __invoke(): string
-    {
-        return ($this->greet)(new Input('Ada'))->message; // "Hello, Ada!"
-    }
-}
-```
+The bridge is an Action middleware at priority 600, the outermost one: the span also covers
+[profiling-bridge-logic](https://github.com/msstc4symfony/profiling-bridge-logic) (500),
+[metrics-bridge-logic](https://github.com/msstc4symfony/metrics-bridge-logic) (400), logging (300), validation (200)
+and lock (100).
+
+tracing-bundle exports no spans: the call tree is rebuilt from the `span_id` / `parent_span_id` log keys.
 
 ## Local development
+
+`composer-ci.json` installs logic-bundle and tracing-bundle from their GitHub repositories.
 
 ```sh
 make install-ci                        # composer-ci.json profile with every CI tool
