@@ -9,9 +9,9 @@
 - **`continueTrace()` не подходит** для span Action: он переписывает `remoteTraceParent` и `traceState`.
 - **`KernelBridgeTest::testTheMiddlewareRunsOutsideLogging` читает приватное `ActionPipeline::$middlewares`**
   через reflection — публичного API порядка у logic-bundle нет.
-- **`new TraceContext(...)` в middleware копирует все поля поштучно** (именованные аргументы): новое необязательное
-  поле `TraceContext` в tracing-bundle 1.x молча станет default внутри Action — его нужно добавить сюда. Лучше
-  было бы `TraceContext::with…()` в tracing-bundle; пока его нет.
+- **Копирование полей `TraceContext` живёт в tracing-bundle** (`withChildSpan()`, с 1.2/бридж 1.1.0): в 1.0.0
+  middleware копировал их сам, и новое поле молча становилось default внутри Action. Без `getTraceParent()` перед
+  `snapshot()` `withChildSpan()` бросит `LogicException`.
 - **Необработанное исключение Action попадает в Sentry со span единицы работы**: обработчик ядра/консоли видит его
   после `restore()` в `finally`. Связь с Action — лог «Fail application action» (он пишется внутри span).
 - **Изменения trace внутри Action отбрасываются** при выходе (`setRequestId`, `continueTrace`, reset) — так задумано.

@@ -7,8 +7,8 @@
   логирование (300), валидация (200) и lock (100). Логи «Start/Finish/Fail application action» logic-bundle несут
   `span_id` запуска и тем связывают его с именем Action.
   - Алгоритм: `getTraceParent()` и `getRequestId()` (фиксируют лениво создаваемые id до snapshot), `snapshot()`,
-    `restore(new TraceContext(...))` с `traceParent = unitSpan->child()` и `parentSpanId = unitSpan->parentId`,
-    остальные поля без изменений; `finally` — `restore($outer)`.
+    `restore($outer->withChildSpan())` (tracing-bundle 1.2: `traceParent = unitSpan->child()`,
+    `parentSpanId = unitSpan->parentId`, остальные поля без изменений); `finally` — `restore($outer)`.
   - Только публичный API tracing-bundle (`RequestIdServiceInterface`, `TraceContext`); `continueTrace()` не
     используется — он подменил бы `remoteTraceParent` (внутри Action `getRemoteTraceParent()` вернул бы span
     единицы работы, а не пришедший по сети).
@@ -16,4 +16,4 @@
     (`createOutgoingTraceParent()` = текущий span с tracing-bundle 1.1).
 - Сервис приватный, id = FQCN. Без TracingBundle контейнер не компилируется (нет `RequestIdServiceInterface`).
 - deptrac: код только в Infrastructure; BundleRoot от него не зависит.
-- Требует tracing-bundle ^1.1 (`TraceContext::$parentSpanId`, `extra.parent_span_id`).
+- Требует tracing-bundle ^1.2 (`TraceContext::withChildSpan()`, `extra.parent_span_id`).
