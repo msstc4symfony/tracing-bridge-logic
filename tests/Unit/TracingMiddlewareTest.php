@@ -26,7 +26,7 @@ use RuntimeException;
 #[CoversClass(TracingMiddleware::class)]
 final class TracingMiddlewareTest extends TestCase
 {
-    private const string RECEIVED = '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01';
+    private const RECEIVED = '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01';
 
     private RequestIdService $trace;
 
@@ -150,7 +150,7 @@ final class TracingMiddlewareTest extends TestCase
     {
         self::assertTrue($this->middleware->supports(ActionContext::of(EchoAction::class)));
         self::assertSame(600, TracingMiddleware::PRIORITY);
-        $attribute = new ReflectionClass(TracingMiddleware::class)->getAttributes(AsActionMiddleware::class)[0] ?? null;
+        $attribute = (new ReflectionClass(TracingMiddleware::class))->getAttributes(AsActionMiddleware::class)[0] ?? null;
         self::assertNotNull($attribute);
         self::assertSame(600, $attribute->newInstance()->priority);
     }

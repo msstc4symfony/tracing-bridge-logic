@@ -11,8 +11,11 @@ run share a `span_id`, and its `parent_span_id` points at the request, command, 
 
 | Bundle | PHP  | Symfony  | logic-bundle | tracing-bundle |
 |--------|------|----------|--------------|----------------|
+| 1.2    | 8.2+ | 7.4, 8.x | ^1.2         | ^1.3           |
 | 1.1    | 8.4+ | 7.4, 8.x | ^1.1         | ^1.2           |
 | 1.0    | 8.4+ | 7.4, 8.x | ^1.1         | ^1.1           |
+
+Symfony 8.x needs PHP 8.4; on PHP 8.2 and 8.3 Composer installs Symfony 7.4.
 
 ## Installation
 

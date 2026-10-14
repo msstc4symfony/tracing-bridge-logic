@@ -16,4 +16,5 @@
     (`createOutgoingTraceParent()` = текущий span с tracing-bundle 1.1).
 - Сервис приватный, id = FQCN. Без TracingBundle контейнер не компилируется (нет `RequestIdServiceInterface`).
 - deptrac: код только в Infrastructure; BundleRoot от него не зависит.
-- Требует tracing-bundle ^1.2 (`TraceContext::withChildSpan()`, `extra.parent_span_id`).
+- Требует tracing-bundle ^1.3 и logic-bundle ^1.2 (с 1.2.0, их релизы на PHP 8.2;
+  tracing-bundle 1.2 дал `TraceContext::withChildSpan()`, `extra.parent_span_id`).

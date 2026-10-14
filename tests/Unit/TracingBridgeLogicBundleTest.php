@@ -13,6 +13,6 @@ final class TracingBridgeLogicBundleTest extends TestCase
 {
     public function testExtensionAliasFollowsTheFamilyNaming(): void
     {
-        self::assertSame('msstc4symfony_tracing_bridge_logic', new TracingBridgeLogicBundle()->getContainerExtension()?->getAlias());
+        self::assertSame('msstc4symfony_tracing_bridge_logic', (new TracingBridgeLogicBundle())->getContainerExtension()?->getAlias());
     }
 }

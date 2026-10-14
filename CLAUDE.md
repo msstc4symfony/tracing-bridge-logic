@@ -7,7 +7,7 @@ Guidance for Claude Code in this repository. Deep references live under `.claude
 Symfony bundle (`msstc4symfony/tracing-bridge-logic`, namespace `Msstc4Symfony\TracingBridgeLogic`, extension
 alias `msstc4symfony_tracing_bridge_logic`, no configuration tree) that connects `msstc4symfony/logic-bundle` to
 `msstc4symfony/tracing-bundle`: every Action run gets its own span id, a child of the calling unit's span.
-PHP >= 8.4, Symfony 7.4 / 8.x.
+PHP >= 8.2, Symfony 7.4 / 8.x.
 
 ## Common commands
 
@@ -24,8 +24,8 @@ Develop against the CI profile: `COMPOSER=composer-ci.json composer install`.
   outside profiling 500, metrics 400 and logging 300). Fixes the lazily created trace and request id, snapshots the
   trace, restores `snapshot()->withChildSpan()` (`traceParent = unit span->child()`, `parentSpanId = unit span id`),
   and restores the snapshot in `finally`.
-- Needs tracing-bundle ^1.2 (`TraceContext::withChildSpan()`, logs `parent_span_id`, outgoing calls carry the
-  current span).
+- Needs tracing-bundle ^1.3 and logic-bundle ^1.2, their PHP 8.2 releases (tracing-bundle 1.2 brought
+  `TraceContext::withChildSpan()`, logs `parent_span_id`, outgoing calls carry the current span).
 - `TracingBridgeLogicBundle` only imports `src/Resources/config/services.php`; without TracingBundle autowiring fails.
 
 Details: `.claude/docs/architecture.md`. **Read `.claude/docs/known-issues.md` before chasing a

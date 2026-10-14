@@ -37,3 +37,15 @@
 - **`exec()` портит вывод с путями**: режет по строкам и срезает пробелы в конце строки, поэтому
   `git ls-files -z` через него теряет символы в именах. Читать через `proc_open` целиком. В тестах не
   читать stdout и stderr из двух pipe по очереди (deadlock при заполненном буфере) — stderr писать в файл.
+- **Код должен разбираться на PHP 8.2** (с 2026-10-14 UTC, профиль `php82` из bundle-standard v2.0.0+): без
+  типизированных констант (`const string X`), без анонимных `new readonly class {}` (оба — 8.3;
+  именованный `readonly class` — 8.2, можно) и без `new X()->m()` / `new X()(...)` (8.4) — только
+  `(new X())->m()`. PHPStan (`phpVersion.min: 80200`) ловит типизированные
+  константы; остальное ловят только `php -l` в job «minimal» (PHP 8.2) и ячейки PHPUnit на 8.2. Шаблоны Rector
+  (`withPhpVersion(PHP_82)`) и CS-Fixer (`new_expression_parentheses`) синтаксис обратно не поднимают.
+  `#[Override]` (8.3) допустим: на 8.2 атрибут не инстанцируется. `array_any/all/find` (8.4) — только с
+  `symfony/polyfill-php84` в `require`. Symfony 8 ставится только на PHP 8.4+.
+  `composer-ci.lock` собран на PHP 8.4 (Symfony 8): на 8.2/8.3 локально — `COMPOSER=composer-ci.json composer update`
+  (или `--prefer-lowest`, как ячейка CI), не `install`.
+- **PhpStorm (`.idea/php.xml` на уровне монорепо) стоит на языке 8.5**: его инспекции предлагают вернуть типы
+  констант и убрать скобки у `new` — для пакетов на 8.2 это шум, не применять.

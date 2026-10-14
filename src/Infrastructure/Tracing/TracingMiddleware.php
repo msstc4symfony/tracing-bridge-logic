@@ -19,7 +19,7 @@ use Override;
 #[AsActionMiddleware(priority: self::PRIORITY)]
 final readonly class TracingMiddleware implements ActionMiddlewareInterface
 {
-    public const int PRIORITY = 600;
+    public const PRIORITY = 600;
 
     public function __construct(
         private RequestIdServiceInterface $trace,
