@@ -24,7 +24,7 @@ Develop against the CI profile: `COMPOSER=composer-ci.json composer install`.
   (outermost, outside profiling 500, metrics 400 and logging 300). `$outer = current(); replace($outer->withChildSpan());
   try … finally replace($outer)` on tracing-bundle's `TraceContextHolderInterface`.
 - Needs tracing-bundle ^2.0 (`^2.0@rc` until final) and logic-bundle ^1.3. tracing 2.0 has no lazily created ids, so
-  nothing is touched before the snapshot.
+  `current()` is taken as is.
 - `TracingBridgeLogicBundle` only imports `src/Resources/config/services.php`; without TracingBundle autowiring fails.
 
 Details: `.claude/docs/architecture.md`. **Read `.claude/docs/known-issues.md` before chasing a

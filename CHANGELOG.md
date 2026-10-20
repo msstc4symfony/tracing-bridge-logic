@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0 - 2026-10-20
+
+- Changed: requires the final 2.0 releases (`^2.0` instead of `^2.0@rc`).
+- Changed: README, CLAUDE.md and project notes completed after review; tests for a nested Action that throws and for
+  outgoing calls from an Action.
+
 ## 2.0.0-rc.1 - 2026-10-20
 
 - Changed: requires tracing-bundle ^2.0 (`^2.0@rc` until tracing 2.0.0 is final): `TracingMiddleware` takes
@@ -7,6 +13,7 @@
   unit's context back afterwards; logic-bundle ^1.3.
 - Changed: `TracingMiddleware` is `@internal`; the public API is the bundle class (README "Public API").
 - Changed: PHPStan enforces `#[\Override]`; adopts bundle-standard v3 (canonical deptrac layers, anchored `BundleRoot`).
+- Upgrading from 1.x: upgrade tracing-bundle to 2.0 (its own upgrade notes apply); the bridge has no configuration.
 
 ## 1.2.0 - 2026-10-14
 

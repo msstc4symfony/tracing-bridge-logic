@@ -2,7 +2,7 @@
 
 ## Бридж
 
-- **1.x: ленивые id tracing-bundle** требовали `getTraceParent()`/`getRequestId()` до `snapshot()`. В tracing 2.0
+- **1.x: ленивые id tracing-bundle** требовали «потрогать» trace и request id до снимка контекста. В tracing 2.0
   `TraceContext` неизменяемый и создаётся целиком — шаг не нужен (2.0.0).
 - **`continuing()` не подходит** для span Action: он переписывает `remoteTraceParent` и `traceState`.
 - **`KernelBridgeTest::testTheMiddlewareRunsOutsideLogging` читает приватное `ActionPipeline::$middlewares`**
@@ -10,7 +10,7 @@
 - **Копирование полей `TraceContext` живёт в tracing-bundle** (`withChildSpan()`): мост поля не копирует, новое поле
   контекста переходит в Action без релиза моста.
 - **Необработанное исключение Action попадает в Sentry со span единицы работы**: обработчик ядра/консоли видит его
-  после `restore()` в `finally`. Связь с Action — лог «Fail application action» (он пишется внутри span).
+  после `replace($outer)` в `finally`. Связь с Action — лог «Fail application action» (он пишется внутри span).
 - **Изменения контекста внутри Action отбрасываются** при выходе (`replace()`, `reset()`) — так задумано.
   Общий держатель не годится для Fiber/async, как и сам tracing-bundle.
 - **Span Action нигде не экспортируется**: tracing-bundle только кладёт id в логи, Sentry и исходящие заголовки.

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5a5198f96c7eb83e483c5dfc8b78518f",
+    "content-hash": "a19da326b0de17c0e34a8bc75a277bb1",
     "packages": [
         {
             "name": "monolog/monolog",
@@ -189,16 +189,16 @@
         },
         {
             "name": "msstc4symfony/tracing-bundle",
-            "version": "v2.0.0-rc.1",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/msstc4symfony/tracing-bundle.git",
-                "reference": "767ec593d9038a8b40be9d88aaceabb855041179"
+                "reference": "e037b66456d26e67cf8a43ab67bf56defd8cc984"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/msstc4symfony/tracing-bundle/zipball/767ec593d9038a8b40be9d88aaceabb855041179",
-                "reference": "767ec593d9038a8b40be9d88aaceabb855041179",
+                "url": "https://api.github.com/repos/msstc4symfony/tracing-bundle/zipball/e037b66456d26e67cf8a43ab67bf56defd8cc984",
+                "reference": "e037b66456d26e67cf8a43ab67bf56defd8cc984",
                 "shasum": ""
             },
             "require": {
@@ -264,9 +264,9 @@
                 "tracing"
             ],
             "support": {
-                "source": "https://github.com/msstc4symfony/tracing-bundle/tree/v2.0.0-rc.1"
+                "source": "https://github.com/msstc4symfony/tracing-bundle/tree/v2.0.0"
             },
-            "time": "2026-10-20T09:03:31+00:00"
+            "time": "2026-10-20T10:25:22+00:00"
         },
         {
             "name": "psr/cache",
@@ -12437,7 +12437,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "msstc4symfony/tracing-bundle": 5,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,

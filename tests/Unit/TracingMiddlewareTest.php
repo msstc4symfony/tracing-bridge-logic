@@ -115,20 +115,43 @@ final class TracingMiddlewareTest extends TestCase
         self::assertSame($action, $seen['outer after inner'] ?? null);
     }
 
-    public function testOutgoingCallsFromTheActionCarryItsSpan(): void
+    public function testOutgoingCallsFromTheActionCarryItsSpanAsTheirParent(): void
     {
+        $unit = $this->trace->current();
         $sent = null;
-        $span = null;
-        $this->middleware->handle(new EchoInput(), ActionContext::of(EchoAction::class), function (InputInterface $input) use (&$sent, &$span): OutputInterface {
+        $this->middleware->handle(new EchoInput(), ActionContext::of(EchoAction::class), function (InputInterface $input) use (&$sent): OutputInterface {
             $sent = $this->trace->current()->outgoing('shop:api')->traceParent;
-            $span = $this->trace->current()->traceParent;
 
             return new EchoOutput('ok');
         });
 
-        self::assertInstanceOf(TraceParent::class, $span);
-        self::assertSame($span, $sent);
-        self::assertNotSame($this->trace->current()->traceParent->spanId, $span->spanId);
+        self::assertInstanceOf(TraceParent::class, $sent);
+        self::assertSame($unit->traceParent->traceId, $sent->traceId);
+        self::assertNotSame($unit->traceParent->spanId, $sent->spanId);
+        self::assertSame($unit->traceParent, $this->trace->current()->outgoing('shop:api')->traceParent);
+    }
+
+    public function testANestedActionThatThrowsGivesBackTheCallersSpanThenTheUnits(): void
+    {
+        $unit = $this->trace->current();
+        $afterInner = null;
+        $action = null;
+        $this->middleware->handle(new EchoInput(), ActionContext::of(EchoAction::class), function (InputInterface $input) use (&$afterInner, &$action): OutputInterface {
+            $action = $this->trace->current();
+
+            try {
+                $this->middleware->handle($input, ActionContext::of(InnerAction::class), static fn (InputInterface $input): never => throw new RuntimeException('inner'));
+            } catch (RuntimeException) {
+            }
+
+            $afterInner = $this->trace->current();
+
+            return new EchoOutput('outer');
+        });
+
+        self::assertInstanceOf(TraceContext::class, $action);
+        self::assertSame($action, $afterInner);
+        self::assertSame($unit, $this->trace->current());
     }
 
     public function testSupportsEveryActionAtPriority600(): void
