@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   standard:
-    uses: msstc4symfony/bundle-standard/.github/workflows/php-bundle.yml@v2.0.1
+    uses: msstc4symfony/bundle-standard/.github/workflows/php-bundle.yml@v3.0.0
     with:
       slug: msstc4symfony/tracing-bridge-logic
       # Measured MSI 100 % / covered 100 % on 2026-10-14 UTC (7 mutants), minus a margin for noise.

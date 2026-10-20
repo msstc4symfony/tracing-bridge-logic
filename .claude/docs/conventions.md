@@ -1,8 +1,8 @@
 # Соглашения
 
 - Код бриджа — в `src/Infrastructure/Tracing/`; Application-слоя нет.
-- Тесты: `tests/Unit/<Класс>Test.php` с `#[CoversClass]`; unit-тест middleware работает с настоящим
-  `RequestIdService` и снимает `snapshot()` внутри `$next`.
+- Тесты: `tests/Unit/<Класс>Test.php` с `#[CoversClass]`; unit-тест middleware работает с
+  `tests/Fixtures/InMemoryTraceHolder` (держатель tracing 2.0 — `@internal`) и читает `current()` внутри `$next`.
 - `tests/Integration/KernelBridgeTest` поднимает настоящий `TestKernel` (Framework, Monolog, Tracing, Logic, бридж)
   и читает `extra` записей logic-bundle из `monolog.handler.main` (тип `test`).
 - Длинные строки в тестах допустимы: конфиг CS семейства их не ограничивает.

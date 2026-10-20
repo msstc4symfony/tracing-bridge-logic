@@ -41,28 +41,10 @@ deptrac:
         - name: BundleRoot
           collectors:
               - type: classLike
-                value: Msstc4Symfony\\TracingBridgeLogic\\TracingBridgeLogicBundle
+                value: '^Msstc4Symfony\\TracingBridgeLogic\\TracingBridgeLogicBundle$'
 
     ruleset:
-        Domain: ~
-        DomainService:
-            - Domain
-        Application:
-            - Domain
-            - DomainService
-        # Adapters implement Domain repositories and Application ports.
-        Infrastructure:
-            - Domain
-            - Application
-        Presentation:
-            - Domain
-            - Application
-        Framework:
-            - Domain
-            - Application
-        DependencyInjection:
-            - Application
-        # The bundle class may register autoconfiguration for Application interfaces.
-        BundleRoot:
-            - Application
-            - DependencyInjection
+        # The logic middleware running every Action in its own trace span depends on nothing else in the bridge.
+        Infrastructure: ~
+
+        BundleRoot: ~

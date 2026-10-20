@@ -2,20 +2,17 @@
 
 ## Бридж
 
-- **Ленивые id tracing-bundle.** `getTraceParent()`/`getRequestId()` создают значения при первом обращении. Если
-  первое обращение случится внутри Action, `restore($outer)` их отбросит, и код после Action получит другой
-  trace id и request id. Поэтому middleware трогает оба до `snapshot()`; тест
-  `testIdsNotCreatedYetAreSharedByTheActionAndTheUnit`.
-- **`continueTrace()` не подходит** для span Action: он переписывает `remoteTraceParent` и `traceState`.
+- **1.x: ленивые id tracing-bundle** требовали `getTraceParent()`/`getRequestId()` до `snapshot()`. В tracing 2.0
+  `TraceContext` неизменяемый и создаётся целиком — шаг не нужен (2.0.0).
+- **`continuing()` не подходит** для span Action: он переписывает `remoteTraceParent` и `traceState`.
 - **`KernelBridgeTest::testTheMiddlewareRunsOutsideLogging` читает приватное `ActionPipeline::$middlewares`**
   через reflection — публичного API порядка у logic-bundle нет.
-- **Копирование полей `TraceContext` живёт в tracing-bundle** (`withChildSpan()`, с 1.2/бридж 1.1.0): в 1.0.0
-  middleware копировал их сам, и новое поле молча становилось default внутри Action. Без `getTraceParent()` перед
-  `snapshot()` `withChildSpan()` бросит `LogicException`.
+- **Копирование полей `TraceContext` живёт в tracing-bundle** (`withChildSpan()`): мост поля не копирует, новое поле
+  контекста переходит в Action без релиза моста.
 - **Необработанное исключение Action попадает в Sentry со span единицы работы**: обработчик ядра/консоли видит его
   после `restore()` в `finally`. Связь с Action — лог «Fail application action» (он пишется внутри span).
-- **Изменения trace внутри Action отбрасываются** при выходе (`setRequestId`, `continueTrace`, reset) — так задумано.
-  Стек snapshot/restore на общем `RequestIdService` не годится для Fiber/async, как и сам tracing-bundle.
+- **Изменения контекста внутри Action отбрасываются** при выходе (`replace()`, `reset()`) — так задумано.
+  Общий держатель не годится для Fiber/async, как и сам tracing-bundle.
 - **Span Action нигде не экспортируется**: tracing-bundle только кладёт id в логи, Sentry и исходящие заголовки.
   Дерево восстанавливается по `span_id`/`parent_span_id` в логах.
 

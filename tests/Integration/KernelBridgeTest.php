@@ -13,8 +13,11 @@ use Msstc4Symfony\TracingBridgeLogic\Test\Fixtures\EchoInput;
 use Msstc4Symfony\TracingBridgeLogic\Test\Fixtures\ExceptionHandlerSnapshot;
 use Msstc4Symfony\TracingBridgeLogic\Test\Fixtures\FailingAction;
 use Msstc4Symfony\TracingBridgeLogic\Test\Integration\Kernel\TestKernel;
-use Msstc4Symfony\TracingBundle\Storage\RequestIdServiceInterface;
-use Msstc4Symfony\TracingBundle\Storage\W3c\TraceParent;
+use Msstc4Symfony\TracingBundle\Application\Port\TraceContextHolderInterface;
+use Msstc4Symfony\TracingBundle\Domain\ValueObject\Baggage;
+use Msstc4Symfony\TracingBundle\Domain\ValueObject\TraceContext;
+use Msstc4Symfony\TracingBundle\Domain\ValueObject\TraceParent;
+use Override;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
@@ -34,6 +37,7 @@ final class KernelBridgeTest extends TestCase
 
     private ExceptionHandlerSnapshot $exceptionHandlers;
 
+    #[Override]
     protected function setUp(): void
     {
         // trigger_deprecation() silences its notice with @, which PHPUnit ignores; record it directly.
@@ -50,6 +54,7 @@ final class KernelBridgeTest extends TestCase
         $this->kernel->boot();
     }
 
+    #[Override]
     protected function tearDown(): void
     {
         restore_error_handler();
@@ -71,7 +76,8 @@ final class KernelBridgeTest extends TestCase
     {
         $received = TraceParent::fromHeader(self::RECEIVED);
         self::assertInstanceOf(TraceParent::class, $received);
-        $unit = $this->trace()->continueTrace($received)->getTraceParent();
+        $this->trace()->replace(TraceContext::start()->continuing($received, null, Baggage::empty()));
+        $unit = $this->trace()->current()->traceParent;
         $action = $this->container()->get(EchoAction::class);
         self::assertIsCallable($action);
 
@@ -82,16 +88,16 @@ final class KernelBridgeTest extends TestCase
         [$start, $finish] = $records;
         self::assertSame($start, $finish);
         self::assertSame($unit->traceId, $start['trace_id']);
-        self::assertSame($unit->parentId, $start['parent_span_id']);
-        self::assertNotSame($unit->parentId, $start['span_id']);
-        self::assertSame($unit, $this->trace()->getTraceParent());
-        self::assertSame($received->parentId, $this->trace()->snapshot()->parentSpanId);
+        self::assertSame($unit->spanId, $start['parent_span_id']);
+        self::assertNotSame($unit->spanId, $start['span_id']);
+        self::assertSame($unit, $this->trace()->current()->traceParent);
+        self::assertSame($received->spanId, $this->trace()->current()->parentSpanId);
         self::assertSame([], $this->bundleDeprecations);
     }
 
     public function testAFailingActionLogsInItsSpanAndTheUnitsTraceComesBack(): void
     {
-        $unit = $this->trace()->getTraceParent();
+        $unit = $this->trace()->current()->traceParent;
         $action = $this->container()->get(FailingAction::class);
         self::assertIsCallable($action);
 
@@ -103,9 +109,9 @@ final class KernelBridgeTest extends TestCase
 
         $records = $this->actionLogExtras();
         self::assertCount(2, $records);
-        self::assertSame($unit->parentId, $records[1]['parent_span_id']);
-        self::assertSame($unit, $this->trace()->getTraceParent());
-        self::assertNull($this->trace()->snapshot()->parentSpanId);
+        self::assertSame($unit->spanId, $records[1]['parent_span_id']);
+        self::assertSame($unit, $this->trace()->current()->traceParent);
+        self::assertNull($this->trace()->current()->parentSpanId);
     }
 
     public function testTheMiddlewareRunsOutsideLogging(): void
@@ -149,10 +155,10 @@ final class KernelBridgeTest extends TestCase
         return $extras;
     }
 
-    private function trace(): RequestIdServiceInterface
+    private function trace(): TraceContextHolderInterface
     {
-        $trace = $this->container()->get(RequestIdServiceInterface::class);
-        self::assertInstanceOf(RequestIdServiceInterface::class, $trace);
+        $trace = $this->container()->get(TraceContextHolderInterface::class);
+        self::assertInstanceOf(TraceContextHolderInterface::class, $trace);
 
         return $trace;
     }

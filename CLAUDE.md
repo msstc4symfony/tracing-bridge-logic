@@ -20,12 +20,11 @@ Develop against the CI profile: `COMPOSER=composer-ci.json composer install`.
 
 ## Architecture in 60 seconds
 
-- `Infrastructure\Tracing\TracingMiddleware` — logic-bundle `ActionMiddlewareInterface`, priority 600 (outermost,
-  outside profiling 500, metrics 400 and logging 300). Fixes the lazily created trace and request id, snapshots the
-  trace, restores `snapshot()->withChildSpan()` (`traceParent = unit span->child()`, `parentSpanId = unit span id`),
-  and restores the snapshot in `finally`.
-- Needs tracing-bundle ^1.3 and logic-bundle ^1.2, their PHP 8.2 releases (tracing-bundle 1.2 brought
-  `TraceContext::withChildSpan()`, logs `parent_span_id`, outgoing calls carry the current span).
+- `Infrastructure\Tracing\TracingMiddleware` (`@internal`) — logic-bundle `ActionMiddlewareInterface`, priority 600
+  (outermost, outside profiling 500, metrics 400 and logging 300). `$outer = current(); replace($outer->withChildSpan());
+  try … finally replace($outer)` on tracing-bundle's `TraceContextHolderInterface`.
+- Needs tracing-bundle ^2.0 (`^2.0@rc` until final) and logic-bundle ^1.3. tracing 2.0 has no lazily created ids, so
+  nothing is touched before the snapshot.
 - `TracingBridgeLogicBundle` only imports `src/Resources/config/services.php`; without TracingBundle autowiring fails.
 
 Details: `.claude/docs/architecture.md`. **Read `.claude/docs/known-issues.md` before chasing a

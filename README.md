@@ -11,7 +11,8 @@ run share a `span_id`, and its `parent_span_id` points at the request, command, 
 
 | Bundle | PHP  | Symfony  | logic-bundle | tracing-bundle |
 |--------|------|----------|--------------|----------------|
-| 1.2+   | 8.2+ | 7.4, 8.x | ^1.2         | ^1.3           |
+| 2.0    | 8.2+ | 7.4, 8.x | ^1.3         | ^2.0@rc        |
+| 1.2    | 8.2+ | 7.4, 8.x | ^1.2         | ^1.3           |
 | 1.1    | 8.4+ | 7.4, 8.x | ^1.1         | ^1.2           |
 | 1.0    | 8.4+ | 7.4, 8.x | ^1.1         | ^1.1           |
 
@@ -37,21 +38,21 @@ Msstc4Symfony\TracingBridgeLogic\TracingBridgeLogicBundle::class => ['all' => tr
 ```
 
 Nothing to configure. Without TracingBundle the container fails to compile: `TracingMiddleware` cannot be
-autowired, as no `RequestIdServiceInterface` service exists.
+autowired, as no `TraceContextHolderInterface` service exists.
 
 ## The span
 
 While an Action runs:
 
 - `span_id` is new, `parent_span_id` is the span id of the unit of work (or Action) that called it;
-- trace id, request id, `request from`, the received `traceparent` and `tracestate` stay those of the unit;
+- trace id, runtime id, the received `traceparent`, `tracestate` and baggage stay those of the unit;
 - HTTP requests and messages sent by the Action carry its span as their parent;
 - an Action called from another Action gets a child of the caller's span.
 
 Afterwards the unit's trace is restored exactly, also when the Action throws; the exception is rethrown unchanged.
 Sentry events captured while the Action runs are tagged with its span; an exception that escapes the Action reaches
 Sentry after the restore, so it carries the unit's span — the "Fail application action" log links it to the Action.
-Changes an Action makes to the trace itself (request id, `continueTrace()`, reset) end with it.
+Changes an Action makes to the trace context itself (`replace()`, `reset()`) end with it.
 logic-bundle's "Start / Finish / Fail application action" logs are written inside the span, so they link a `span_id`
 to the Action's name.
 
@@ -61,6 +62,11 @@ The bridge is an Action middleware at priority 600, the outermost one: the span 
 and lock (100).
 
 tracing-bundle exports no spans: the call tree is rebuilt from the `span_id` / `parent_span_id` log keys.
+
+## Public API
+
+Only the bundle class `Msstc4Symfony\TracingBridgeLogic\TracingBridgeLogicBundle`; the middleware is `@internal`
+and is wired by the bundle.
 
 ## Local development
 
