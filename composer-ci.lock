@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a19da326b0de17c0e34a8bc75a277bb1",
+    "content-hash": "e582edd8dd15690c7c00690b2694fdfe",
     "packages": [
         {
             "name": "monolog/monolog",
@@ -116,7 +116,7 @@
             "version": "v1.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/msstc4symfony/logic-bundle.git",
+                "url": "git@github.com:msstc4symfony/logic-bundle.git",
                 "reference": "acab50177f3c7191fd0994103f8bd8f212ce359e"
             },
             "dist": {
@@ -182,9 +182,6 @@
                 "symfony",
                 "use-case"
             ],
-            "support": {
-                "source": "https://github.com/msstc4symfony/logic-bundle/tree/v1.3.0"
-            },
             "time": "2026-10-19T06:51:05+00:00"
         },
         {
@@ -192,7 +189,7 @@
             "version": "v2.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/msstc4symfony/tracing-bundle.git",
+                "url": "git@github.com:msstc4symfony/tracing-bundle.git",
                 "reference": "e037b66456d26e67cf8a43ab67bf56defd8cc984"
             },
             "dist": {

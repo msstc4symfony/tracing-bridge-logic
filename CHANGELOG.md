@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.1 - 2026-10-23
+
+- Changed: allows logic-bundle 2.0 (`^1.3|^2.0`); 2.0 only marks logic-bundle internals `@internal`, none of
+  which the bridge uses.
+
 ## 2.0.0 - 2026-10-20
 
 - Changed: requires the final 2.0 releases (`^2.0` instead of `^2.0@rc`).
