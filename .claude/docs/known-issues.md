@@ -5,8 +5,9 @@
 - **1.x: ленивые id tracing-bundle** требовали «потрогать» trace и request id до снимка контекста. В tracing 2.0
   `TraceContext` неизменяемый и создаётся целиком — шаг не нужен (2.0.0).
 - **`continuing()` не подходит** для span Action: он переписывает `remoteTraceParent` и `traceState`.
-- **`KernelBridgeTest::testTheMiddlewareRunsOutsideLogging` читает приватное `ActionPipeline::$middlewares`**
-  через reflection — публичного API порядка у logic-bundle нет.
+- **`KernelBridgeTest` читает порядок middleware через `MiddlewareChainInterface::middlewares()`** (logic-bundle
+  2.1.0; раньше — рефлексией по приватному `ActionPipeline::$middlewares`). При logic < 2.1 (prefer-lowest на 1.3) такие
+  тесты помечаются skipped, ограничение `^1.3|^2.0` не поднято.
 - **Копирование полей `TraceContext` живёт в tracing-bundle** (`withChildSpan()`): мост поля не копирует, новое поле
   контекста переходит в Action без релиза моста.
 - **Необработанное исключение Action попадает в Sentry со span единицы работы**: обработчик ядра/консоли видит его

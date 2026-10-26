@@ -6,7 +6,8 @@ namespace Msstc4Symfony\TracingBridgeLogic\Test\Integration;
 
 use Monolog\Handler\TestHandler;
 use Msstc4Symfony\LogicBundle\Application\Logging\LoggingMiddleware;
-use Msstc4Symfony\LogicBundle\Application\Pipeline\ActionPipeline;
+use Msstc4Symfony\LogicBundle\Application\Pipeline\ActionMiddlewareInterface;
+use Msstc4Symfony\LogicBundle\Application\Pipeline\MiddlewareChainInterface;
 use Msstc4Symfony\TracingBridgeLogic\Infrastructure\Tracing\TracingMiddleware;
 use Msstc4Symfony\TracingBridgeLogic\Test\Fixtures\EchoAction;
 use Msstc4Symfony\TracingBridgeLogic\Test\Fixtures\EchoInput;
@@ -20,7 +21,6 @@ use Msstc4Symfony\TracingBundle\Domain\ValueObject\TraceParent;
 use Override;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
-use ReflectionProperty;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -116,16 +116,7 @@ final class KernelBridgeTest extends TestCase
 
     public function testTheMiddlewareRunsOutsideLogging(): void
     {
-        // Reads ActionPipeline's private middleware list: logic-bundle exposes no public order; see known-issues.md.
-        $pipeline = $this->container()->get(EchoAction::class);
-        self::assertInstanceOf(ActionPipeline::class, $pipeline);
-        $middlewares = (new ReflectionProperty($pipeline, 'middlewares'))->getValue($pipeline);
-        self::assertIsIterable($middlewares);
-        $classes = [];
-        foreach ($middlewares as $middleware) {
-            self::assertIsObject($middleware);
-            $classes[] = $middleware::class;
-        }
+        $classes = array_map(static fn (object $middleware): string => $middleware::class, $this->middlewares());
 
         $tracing = array_search(TracingMiddleware::class, $classes, true);
         $logging = array_search(LoggingMiddleware::class, $classes, true);
@@ -169,5 +160,20 @@ final class KernelBridgeTest extends TestCase
         self::assertInstanceOf(ContainerInterface::class, $container);
 
         return $container;
+    }
+
+    /**
+     * @return list<ActionMiddlewareInterface>
+     */
+    private function middlewares(): array
+    {
+        if (!interface_exists(MiddlewareChainInterface::class)) {
+            self::markTestSkipped('logic-bundle exposes the middleware order from 2.1 on.');
+        }
+
+        $action = $this->container()->get(EchoAction::class);
+        self::assertInstanceOf(MiddlewareChainInterface::class, $action);
+
+        return $action->middlewares();
     }
 }

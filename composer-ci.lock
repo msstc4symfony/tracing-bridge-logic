@@ -113,16 +113,16 @@
         },
         {
             "name": "msstc4symfony/logic-bundle",
-            "version": "v1.3.0",
+            "version": "v2.1.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:msstc4symfony/logic-bundle.git",
-                "reference": "acab50177f3c7191fd0994103f8bd8f212ce359e"
+                "url": "https://github.com/msstc4symfony/logic-bundle.git",
+                "reference": "86c083a3905bdeebc4fd472640869ffb61645e2b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/msstc4symfony/logic-bundle/zipball/acab50177f3c7191fd0994103f8bd8f212ce359e",
-                "reference": "acab50177f3c7191fd0994103f8bd8f212ce359e",
+                "url": "https://api.github.com/repos/msstc4symfony/logic-bundle/zipball/86c083a3905bdeebc4fd472640869ffb61645e2b",
+                "reference": "86c083a3905bdeebc4fd472640869ffb61645e2b",
                 "shasum": ""
             },
             "require": {
@@ -182,7 +182,10 @@
                 "symfony",
                 "use-case"
             ],
-            "time": "2026-10-19T06:51:05+00:00"
+            "support": {
+                "source": "https://github.com/msstc4symfony/logic-bundle/tree/v2.1.0"
+            },
+            "time": "2026-10-26T13:28:32+00:00"
         },
         {
             "name": "msstc4symfony/tracing-bundle",
