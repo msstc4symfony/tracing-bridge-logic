@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   standard:
-    uses: msstc4symfony/bundle-standard/.github/workflows/php-bundle.yml@v4.0.0
+    uses: msstc4symfony/bundle-standard/.github/workflows/php-bundle.yml@v4.1.0
     with:
       # Measured MSI 100 % / covered 100 % on 2026-10-20 UTC (5 mutants), minus a margin for noise.
       infection-min-msi: 97
